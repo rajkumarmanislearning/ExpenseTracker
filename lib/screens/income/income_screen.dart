@@ -5,6 +5,7 @@ import '../../database/dao/income_dao.dart';
 import '../../widgets/app_drawer.dart';
 
 import '../../main.dart';
+import 'income_entry_screen.dart';
 
 class IncomeScreen extends StatefulWidget {
   const IncomeScreen({super.key});
@@ -41,6 +42,14 @@ class _IncomeScreenState extends State<IncomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double totalProjected = 0;
+    double totalPaid = 0;
+    for (final record in _incomeRecords) {
+      totalProjected += (record['projected_amount'] ?? 0) as double;
+      totalPaid += (record['amount_paid'] ?? 0) as double;
+    }
+    double balance = totalProjected - totalPaid;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Income'),
@@ -79,16 +88,30 @@ class _IncomeScreenState extends State<IncomeScreen> {
                   ),
                   margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: ListTile(
-                    leading: const Icon(Icons.attach_money),
-                    title: Text(record['description'] ?? 'No Description'),
-                    subtitle: Text('Date: ${record['income_date']}'),
+                    leading: const Icon(Icons.category), // TODO: Replace with actual category icon
+                    title: Text(record['description'] ?? record['category_name'] ?? 'No Description'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Date: 	${record['income_date'] ?? ''}'),
+                        Text('Projected: 	${record['projected_amount'] ?? 0}'),
+                        Text('Received: 	${record['amount_paid'] ?? 0}'),
+                        Text('Status: 	${record['payment_status_name'] ?? ''}'),
+                      ],
+                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
                           icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            // Open edit dialog
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => IncomeEntryScreen(income: record),
+                              ),
+                            );
+                            if (result == true) _loadIncome();
                           },
                         ),
                         IconButton(
@@ -105,11 +128,29 @@ class _IncomeScreenState extends State<IncomeScreen> {
               },
             ),
           ),
+          Container(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Total Projected: 	$totalProjected'),
+                Text('Total Paid: 	$totalPaid'),
+                Text('Balance: 	$balance'),
+              ],
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Open add dialog
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const IncomeEntryScreen(),
+            ),
+          );
+          if (result == true) _loadIncome();
         },
         child: const Icon(Icons.add),
       ),

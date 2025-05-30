@@ -29,4 +29,13 @@ class PaymentStatusDao {
       whereArgs: [id],
     );
   }
+
+  Future<List<Map<String, dynamic>>> getPaymentStatusesByType(String type) async {
+    final db = await DatabaseHelper.database;
+    return db.query(
+      DatabaseHelper.tablePaymentStatus,
+      where: 'type = ?',
+      whereArgs: [type],
+    );
+  }
 }

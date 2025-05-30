@@ -29,4 +29,13 @@ class CategoryDao {
       whereArgs: [id],
     );
   }
+
+  Future<List<Map<String, dynamic>>> getCategoriesByType(String type) async {
+    final db = await DatabaseHelper.database;
+    return db.query(
+      DatabaseHelper.tableCategory,
+      where: 'type = ?',
+      whereArgs: [type],
+    );
+  }
 }
