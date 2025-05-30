@@ -106,21 +106,23 @@ class _IncomeScreenState extends State<IncomeScreen> {
               itemBuilder: (context, index) {
                 final record = _incomeRecords[index];
                 return Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  color: Theme.of(context).colorScheme.surfaceVariant,
                   child: ListTile(
-                    leading: const Icon(Icons.category), // TODO: Replace with actual category icon
-                    title: Text(record['description'] ?? record['category_name'] ?? 'No Description'),
+                    leading: Icon(Icons.category, color: Colors.teal),
+                    title: Text(record['description'] ?? record['category_name'] ?? 'No Description', style: Theme.of(context).textTheme.titleMedium),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Date: 	${record['income_date'] ?? ''}'),
-                        Text('Projected: 	${record['projected_amount'] ?? 0}'),
-                        Text('Received: 	${record['amount_paid'] ?? 0}'),
-                        Text('Status: 	${record['payment_status_name'] ?? ''}'),
+                        Text('Date: ${record['income_date'] ?? ''}'),
+                        Text('Projected: ${record['projected_amount'] ?? 0}'),
+                        Text('Received: ${record['amount_paid'] ?? 0}'),
+                        Chip(
+                          label: Text('Status: ${record['payment_status_name'] ?? ''}'),
+                          backgroundColor: Colors.blue,
+                          labelStyle: const TextStyle(color: Colors.white),
+                        ),
                       ],
                     ),
                     trailing: Row(
@@ -158,9 +160,9 @@ class _IncomeScreenState extends State<IncomeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Total Projected: 	$totalProjected'),
-                Text('Total Paid: 	$totalPaid'),
-                Text('Balance: 	$balance'),
+                Text('Total Projected: $totalProjected', style: Theme.of(context).textTheme.bodyLarge),
+                Text('Total Paid: $totalPaid', style: Theme.of(context).textTheme.bodyLarge),
+                Text('Balance: $balance', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
               ],
             ),
           ),

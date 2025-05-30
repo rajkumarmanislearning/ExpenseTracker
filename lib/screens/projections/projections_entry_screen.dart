@@ -108,7 +108,12 @@ class _ProjectionsEntryScreenState extends State<ProjectionsEntryScreen> {
                   child: Text(cat['name']),
                 )).toList(),
                 onChanged: (value) => setState(() => _selectedCategoryId = value),
-                decoration: const InputDecoration(labelText: 'Category'),
+                decoration: InputDecoration(
+                  labelText: 'Category',
+                  filled: true,
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.category),
+                ),
                 validator: (value) => value == null ? 'Please select a category' : null,
               ),
               TextFormField(
@@ -133,7 +138,12 @@ class _ProjectionsEntryScreenState extends State<ProjectionsEntryScreen> {
               ),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  filled: true,
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.description),
+                ),
               ),
               TextFormField(
                 controller: _remarksController,
@@ -160,6 +170,10 @@ class _ProjectionsEntryScreenState extends State<ProjectionsEntryScreen> {
                 ),
               ),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
                 onPressed: _saveProjection,
                 child: const Text('Save'),
               ),

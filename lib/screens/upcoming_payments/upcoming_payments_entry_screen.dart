@@ -118,7 +118,12 @@ class _UpcomingPaymentsEntryScreenState extends State<UpcomingPaymentsEntryScree
                   child: Text(cat['name']),
                 )).toList(),
                 onChanged: (value) => setState(() => _selectedCategoryId = value),
-                decoration: const InputDecoration(labelText: 'Category'),
+                decoration: InputDecoration(
+                  labelText: 'Category',
+                  filled: true,
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.category),
+                ),
                 validator: (value) => value == null ? 'Please select a category' : null,
               ),
               TextFormField(
@@ -139,15 +144,30 @@ class _UpcomingPaymentsEntryScreenState extends State<UpcomingPaymentsEntryScree
                   child: Text(status['name']),
                 )).toList(),
                 onChanged: (value) => setState(() => _selectedPaymentStatusId = value),
-                decoration: const InputDecoration(labelText: 'Payment Status'),
+                decoration: InputDecoration(
+                  labelText: 'Payment Status',
+                  filled: true,
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.payment),
+                ),
               ),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  filled: true,
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.description),
+                ),
               ),
               TextFormField(
                 controller: _remarksController,
-                decoration: const InputDecoration(labelText: 'Remarks'),
+                decoration: InputDecoration(
+                  labelText: 'Remarks',
+                  filled: true,
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.comment),
+                ),
               ),
               ListTile(
                 title: const Text('Upcoming From Date'),
@@ -210,6 +230,10 @@ class _UpcomingPaymentsEntryScreenState extends State<UpcomingPaymentsEntryScree
                 ),
               ),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
                 onPressed: _savePayment,
                 child: const Text('Save'),
               ),

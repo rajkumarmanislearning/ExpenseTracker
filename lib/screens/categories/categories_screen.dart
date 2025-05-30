@@ -63,41 +63,21 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               itemBuilder: (context, index) {
                 final category = _categories[index];
                 return Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  color: Theme.of(context).colorScheme.surfaceVariant,
                   child: ListTile(
-                    leading: const Icon(Icons.category),
-                    title: Text(category['name']),
+                    leading: Icon(Icons.category, color: Colors.deepPurple),
+                    title: Text(category['name'], style: Theme.of(context).textTheme.titleMedium),
                     subtitle: Text(category['description'] ?? ''),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CategoryEntryScreen(category: category),
-                              ),
-                            );
-                            if (result == true) {
-                              _loadCategories();
-                            }
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () async {
-                            await _categoryDao.deleteCategory(category['id']);
-                            _loadCategories();
-                          },
-                        ),
-                      ],
+                    trailing: Chip(
+                      label: Text(category['type']),
+                      backgroundColor: category['type'] == 'income' ? Colors.green : (category['type'] == 'projections' ? Colors.blue : Colors.orange),
+                      labelStyle: const TextStyle(color: Colors.white),
                     ),
+                    onTap: () {
+                      // Optionally open edit
+                    },
                   ),
                 );
               },

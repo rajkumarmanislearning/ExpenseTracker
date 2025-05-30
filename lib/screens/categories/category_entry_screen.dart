@@ -74,13 +74,23 @@ class _CategoryEntryScreenState extends State<CategoryEntryScreen> {
                     _selectedType = value;
                   });
                 },
-                decoration: const InputDecoration(labelText: 'Category Type'),
+                decoration: InputDecoration(
+                  labelText: 'Category Type',
+                  filled: true,
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.category),
+                ),
                 validator: (value) => value == null ? 'Please select a type' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 initialValue: _name,
-                decoration: const InputDecoration(labelText: 'Name'),
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  filled: true,
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.label),
+                ),
                 validator: (value) => value!.isEmpty ? 'Name is required' : null,
                 onSaved: (value) => _name = value,
               ),
@@ -92,6 +102,10 @@ class _CategoryEntryScreenState extends State<CategoryEntryScreen> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
                 onPressed: _saveCategory,
                 child: const Text('Save'),
               ),

@@ -113,15 +113,12 @@ class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
                   }
                 }
                 return Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   color: cardColor.withOpacity(0.2),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: ListTile(
-                    leading: const Icon(Icons.category),
-                    title: Text(record['category_name'] ?? 'No Category'),
+                    leading: Icon(Icons.category, color: Colors.teal),
+                    title: Text(record['category_name'] ?? 'No Category', style: Theme.of(context).textTheme.titleMedium),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -131,8 +128,16 @@ class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
                         Text('Renewal: ${record['renewal_date'] ?? ''}'),
                         Text('Projected: ${record['projected_amount'] ?? 0}'),
                         Text('Paid: ${record['amount_paid'] ?? 0}'),
-                        Text('Status: ${record['payment_status_name'] ?? ''}'),
-                        Text('Days to Go: $daysToGo'),
+                        Chip(
+                          label: Text('Status: ${record['payment_status_name'] ?? ''}'),
+                          backgroundColor: cardColor,
+                          labelStyle: const TextStyle(color: Colors.white),
+                        ),
+                        Chip(
+                          label: Text('Days to Go: $daysToGo'),
+                          backgroundColor: daysToGo > 0 ? Colors.green : (daysToGo == 0 ? Colors.yellow : Colors.red),
+                          labelStyle: const TextStyle(color: Colors.white),
+                        ),
                       ],
                     ),
                     trailing: Row(
@@ -170,9 +175,9 @@ class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Total Projected: \t$totalProjected'),
-                Text('Total Paid: \t$totalPaid'),
-                Text('Balance: \t$balance'),
+                Text('Total Projected: $totalProjected', style: Theme.of(context).textTheme.bodyLarge),
+                Text('Total Paid: $totalPaid', style: Theme.of(context).textTheme.bodyLarge),
+                Text('Balance: $balance', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
               ],
             ),
           ),
