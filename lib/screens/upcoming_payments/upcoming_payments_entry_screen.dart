@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../database/dao/income_dao.dart';
+import '../../database/dao/upcoming_payments_dao.dart';
 import '../../database/dao/category_dao.dart';
 import '../../database/dao/payment_status_dao.dart';
 import '../../main.dart';
 
-class IncomeEntryScreen extends StatefulWidget {
-  final Map<String, dynamic>? income;
-
-  const IncomeEntryScreen({Key? key, this.income}) : super(key: key);
+class UpcomingPaymentsEntryScreen extends StatefulWidget {
+  final Map<String, dynamic>? payment;
+  const UpcomingPaymentsEntryScreen({Key? key, this.payment}) : super(key: key);
 
   @override
-  State<IncomeEntryScreen> createState() => _IncomeEntryScreenState();
+  State<UpcomingPaymentsEntryScreen> createState() => _UpcomingPaymentsEntryScreenState();
 }
 
-class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
+class _UpcomingPaymentsEntryScreenState extends State<UpcomingPaymentsEntryScreen> {
   final _formKey = GlobalKey<FormState>();
-  final IncomeDao _incomeDao = IncomeDao();
+  final UpcomingPaymentsDao _upcomingPaymentsDao = UpcomingPaymentsDao();
   final CategoryDao _categoryDao = CategoryDao();
   final PaymentStatusDao _paymentStatusDao = PaymentStatusDao();
 
@@ -24,7 +23,9 @@ class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
   late TextEditingController _remarksController;
   late TextEditingController _projectedAmountController;
   late TextEditingController _amountPaidController;
-  DateTime? _incomeDate;
+  DateTime? _upcomingFromDate;
+  DateTime? _upcomingToDate;
+  DateTime? _renewalDate;
   int? _selectedCategoryId;
   int? _selectedPaymentStatusId;
   List<Map<String, dynamic>> _categories = [];
@@ -33,28 +34,34 @@ class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
   @override
   void initState() {
     super.initState();
-    _descriptionController = TextEditingController(text: widget.income?['description'] ?? '');
-    _remarksController = TextEditingController(text: widget.income?['remarks'] ?? '');
-    _projectedAmountController = TextEditingController(text: widget.income?['projected_amount']?.toString() ?? '');
-    _amountPaidController = TextEditingController(text: widget.income?['amount_paid']?.toString() ?? '');
-    _incomeDate = widget.income?['income_date'] != null
-      ? DateTime.tryParse(widget.income!['income_date'])
+    _descriptionController = TextEditingController(text: widget.payment?['description'] ?? '');
+    _remarksController = TextEditingController(text: widget.payment?['remarks'] ?? '');
+    _projectedAmountController = TextEditingController(text: widget.payment?['projected_amount']?.toString() ?? '');
+    _amountPaidController = TextEditingController(text: widget.payment?['amount_paid']?.toString() ?? '');
+    _upcomingFromDate = widget.payment?['upcoming_from_date'] != null
+      ? DateTime.tryParse(widget.payment!['upcoming_from_date'])
       : globalMonthController.value;
-    _selectedCategoryId = widget.income?['category_id'];
-    _selectedPaymentStatusId = widget.income?['payment_status_id'];
+    _upcomingToDate = widget.payment?['upcoming_to_date'] != null
+      ? DateTime.tryParse(widget.payment!['upcoming_to_date'])
+      : globalMonthController.value;
+    _renewalDate = widget.payment?['renewal_date'] != null
+      ? DateTime.tryParse(widget.payment!['renewal_date'])
+      : globalMonthController.value;
+    _selectedCategoryId = widget.payment?['category_id'];
+    _selectedPaymentStatusId = widget.payment?['payment_status_id'];
     _loadCategories();
     _loadPaymentStatuses();
   }
 
   Future<void> _loadCategories() async {
-    final cats = await _categoryDao.getCategoriesByType('income');
+    final cats = await _categoryDao.getCategoriesByType('upcoming');
     setState(() {
       _categories = cats;
     });
   }
 
   Future<void> _loadPaymentStatuses() async {
-    final statuses = await _paymentStatusDao.getPaymentStatusesByType('income');
+    final statuses = await _paymentStatusDao.getPaymentStatusesByType('upcoming');
     setState(() {
       _paymentStatuses = statuses;
     });
@@ -69,25 +76,25 @@ class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
     super.dispose();
   }
 
-  Future<void> _saveIncome() async {
-    if (_formKey.currentState!.validate() && _incomeDate != null) {
-      final income = {
-        'id': widget.income?['id'],
+  Future<void> _savePayment() async {
+    if (_formKey.currentState!.validate() && _upcomingFromDate != null && _upcomingToDate != null && _renewalDate != null) {
+      final payment = {
+        'id': widget.payment?['id'],
         'category_id': _selectedCategoryId,
         'description': _descriptionController.text,
-        'income_date': DateFormat('yyyy-MM-dd').format(_incomeDate!),
+        'upcoming_from_date': DateFormat('yyyy-MM-dd').format(_upcomingFromDate!),
+        'upcoming_to_date': DateFormat('yyyy-MM-dd').format(_upcomingToDate!),
+        'renewal_date': DateFormat('yyyy-MM-dd').format(_renewalDate!),
         'projected_amount': double.tryParse(_projectedAmountController.text),
         'amount_paid': double.tryParse(_amountPaidController.text),
         'payment_status_id': _selectedPaymentStatusId,
         'remarks': _remarksController.text,
       };
-
-      if (widget.income == null) {
-        await _incomeDao.insertIncome(income);
+      if (widget.payment == null) {
+        await _upcomingPaymentsDao.insertUpcomingPayment(payment);
       } else {
-        await _incomeDao.updateIncome(income);
+        await _upcomingPaymentsDao.updateUpcomingPayment(payment);
       }
-
       Navigator.pop(context, true);
     }
   }
@@ -96,7 +103,7 @@ class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.income == null ? 'Add Income' : 'Edit Income'),
+        title: Text(widget.payment == null ? 'Add Upcoming Payment' : 'Edit Upcoming Payment'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -143,33 +150,73 @@ class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
                 decoration: const InputDecoration(labelText: 'Remarks'),
               ),
               ListTile(
-                title: const Text('Income Date'),
-                subtitle: Text(_incomeDate != null ? DateFormat('yyyy-MM-dd').format(_incomeDate!) : 'Select date'),
+                title: const Text('Upcoming From Date'),
+                subtitle: Text(_upcomingFromDate != null ? DateFormat('yyyy-MM-dd').format(_upcomingFromDate!) : 'Select date'),
                 trailing: IconButton(
                   icon: const Icon(Icons.calendar_today),
                   onPressed: () async {
                     final picked = await showDatePicker(
                       context: context,
-                      initialDate: _incomeDate ?? globalMonthController.value,
+                      initialDate: _upcomingFromDate ?? globalMonthController.value,
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100),
                     );
                     if (picked != null) {
                       setState(() {
-                        _incomeDate = picked;
+                        _upcomingFromDate = picked;
+                      });
+                    }
+                  },
+                ),
+              ),
+              ListTile(
+                title: const Text('Upcoming To Date'),
+                subtitle: Text(_upcomingToDate != null ? DateFormat('yyyy-MM-dd').format(_upcomingToDate!) : 'Select date'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _upcomingToDate ?? globalMonthController.value,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _upcomingToDate = picked;
+                      });
+                    }
+                  },
+                ),
+              ),
+              ListTile(
+                title: const Text('Renewal Date'),
+                subtitle: Text(_renewalDate != null ? DateFormat('yyyy-MM-dd').format(_renewalDate!) : 'Select date'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _renewalDate ?? globalMonthController.value,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _renewalDate = picked;
                       });
                     }
                   },
                 ),
               ),
               ElevatedButton(
-                onPressed: _saveIncome,
+                onPressed: _savePayment,
                 child: const Text('Save'),
               ),
-              if (_incomeDate == null)
+              if (_upcomingFromDate == null || _upcomingToDate == null || _renewalDate == null)
                 const Padding(
                   padding: EdgeInsets.only(top: 8.0),
-                  child: Text('Please select an income date', style: TextStyle(color: Colors.red)),
+                  child: Text('Please select all dates', style: TextStyle(color: Colors.red)),
                 ),
             ],
           ),

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../database/dao/income_dao.dart';
 import '../../widgets/app_drawer.dart';
+import '../../widgets/month_controller_bar.dart';
 
 import '../../main.dart';
 import 'income_entry_screen.dart';
@@ -45,8 +46,10 @@ class _IncomeScreenState extends State<IncomeScreen> {
     double totalProjected = 0;
     double totalPaid = 0;
     for (final record in _incomeRecords) {
-      totalProjected += (record['projected_amount'] ?? 0) as double;
-      totalPaid += (record['amount_paid'] ?? 0) as double;
+      final projected = record['projected_amount'];
+      final paid = record['amount_paid'];
+      totalProjected += projected is int ? projected.toDouble() : (projected ?? 0.0);
+      totalPaid += paid is int ? paid.toDouble() : (paid ?? 0.0);
     }
     double balance = totalProjected - totalPaid;
 
@@ -75,7 +78,28 @@ class _IncomeScreenState extends State<IncomeScreen> {
       drawer: const AppDrawer(),
       body: Column(
         children: [
-          _buildMonthPickerBar(),
+          MonthControllerBar(
+            selectedMonth: globalMonthController.value,
+            onMonthChanged: (newMonth) {
+              globalMonthController.value = newMonth;
+            },
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: globalMonthController.value,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+                initialEntryMode: DatePickerEntryMode.calendarOnly,
+                helpText: 'Select Month',
+                fieldLabelText: 'Month',
+                fieldHintText: 'Month/Year',
+                selectableDayPredicate: (date) => date.day == 1,
+              );
+              if (picked != null) {
+                globalMonthController.value = DateTime(picked.year, picked.month);
+              }
+            },
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: _incomeRecords.length,
@@ -154,32 +178,6 @@ class _IncomeScreenState extends State<IncomeScreen> {
         },
         child: const Icon(Icons.add),
       ),
-    );
-  }
-
-  Widget _buildMonthPickerBar() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () {
-            // Navigate to previous month
-          },
-        ),
-        TextButton(
-          onPressed: () {
-            // Open month picker dialog
-          },
-          child: const Text('May 2025'), // Replace with actual month
-        ),
-        IconButton(
-          icon: const Icon(Icons.chevron_right),
-          onPressed: () {
-            // Navigate to next month
-          },
-        ),
-      ],
     );
   }
 }

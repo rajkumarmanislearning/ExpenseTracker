@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../database/dao/income_dao.dart';
+import '../../database/dao/projections_dao.dart';
 import '../../database/dao/category_dao.dart';
 import '../../database/dao/payment_status_dao.dart';
 import '../../main.dart';
 
-class IncomeEntryScreen extends StatefulWidget {
-  final Map<String, dynamic>? income;
-
-  const IncomeEntryScreen({Key? key, this.income}) : super(key: key);
+class ProjectionsEntryScreen extends StatefulWidget {
+  final Map<String, dynamic>? projection;
+  const ProjectionsEntryScreen({Key? key, this.projection}) : super(key: key);
 
   @override
-  State<IncomeEntryScreen> createState() => _IncomeEntryScreenState();
+  State<ProjectionsEntryScreen> createState() => _ProjectionsEntryScreenState();
 }
 
-class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
+class _ProjectionsEntryScreenState extends State<ProjectionsEntryScreen> {
   final _formKey = GlobalKey<FormState>();
-  final IncomeDao _incomeDao = IncomeDao();
+  final ProjectionsDao _projectionsDao = ProjectionsDao();
   final CategoryDao _categoryDao = CategoryDao();
   final PaymentStatusDao _paymentStatusDao = PaymentStatusDao();
 
@@ -24,7 +23,7 @@ class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
   late TextEditingController _remarksController;
   late TextEditingController _projectedAmountController;
   late TextEditingController _amountPaidController;
-  DateTime? _incomeDate;
+  DateTime? _projectionDate;
   int? _selectedCategoryId;
   int? _selectedPaymentStatusId;
   List<Map<String, dynamic>> _categories = [];
@@ -33,28 +32,28 @@ class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
   @override
   void initState() {
     super.initState();
-    _descriptionController = TextEditingController(text: widget.income?['description'] ?? '');
-    _remarksController = TextEditingController(text: widget.income?['remarks'] ?? '');
-    _projectedAmountController = TextEditingController(text: widget.income?['projected_amount']?.toString() ?? '');
-    _amountPaidController = TextEditingController(text: widget.income?['amount_paid']?.toString() ?? '');
-    _incomeDate = widget.income?['income_date'] != null
-      ? DateTime.tryParse(widget.income!['income_date'])
+    _descriptionController = TextEditingController(text: widget.projection?['description'] ?? '');
+    _remarksController = TextEditingController(text: widget.projection?['remarks'] ?? '');
+    _projectedAmountController = TextEditingController(text: widget.projection?['projected_amount']?.toString() ?? '');
+    _amountPaidController = TextEditingController(text: widget.projection?['amount_paid']?.toString() ?? '');
+    _projectionDate = widget.projection?['projection_date'] != null
+      ? DateTime.tryParse(widget.projection!['projection_date'])
       : globalMonthController.value;
-    _selectedCategoryId = widget.income?['category_id'];
-    _selectedPaymentStatusId = widget.income?['payment_status_id'];
+    _selectedCategoryId = widget.projection?['category_id'];
+    _selectedPaymentStatusId = widget.projection?['payment_status_id'];
     _loadCategories();
     _loadPaymentStatuses();
   }
 
   Future<void> _loadCategories() async {
-    final cats = await _categoryDao.getCategoriesByType('income');
+    final cats = await _categoryDao.getCategoriesByType('projections');
     setState(() {
       _categories = cats;
     });
   }
 
   Future<void> _loadPaymentStatuses() async {
-    final statuses = await _paymentStatusDao.getPaymentStatusesByType('income');
+    final statuses = await _paymentStatusDao.getPaymentStatusesByType('projections');
     setState(() {
       _paymentStatuses = statuses;
     });
@@ -69,25 +68,23 @@ class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
     super.dispose();
   }
 
-  Future<void> _saveIncome() async {
-    if (_formKey.currentState!.validate() && _incomeDate != null) {
-      final income = {
-        'id': widget.income?['id'],
+  Future<void> _saveProjection() async {
+    if (_formKey.currentState!.validate() && _projectionDate != null) {
+      final projection = {
+        'id': widget.projection?['id'],
         'category_id': _selectedCategoryId,
         'description': _descriptionController.text,
-        'income_date': DateFormat('yyyy-MM-dd').format(_incomeDate!),
+        'projection_date': DateFormat('yyyy-MM-dd').format(_projectionDate!),
         'projected_amount': double.tryParse(_projectedAmountController.text),
         'amount_paid': double.tryParse(_amountPaidController.text),
         'payment_status_id': _selectedPaymentStatusId,
         'remarks': _remarksController.text,
       };
-
-      if (widget.income == null) {
-        await _incomeDao.insertIncome(income);
+      if (widget.projection == null) {
+        await _projectionsDao.insertProjection(projection);
       } else {
-        await _incomeDao.updateIncome(income);
+        await _projectionsDao.updateProjection(projection);
       }
-
       Navigator.pop(context, true);
     }
   }
@@ -96,7 +93,7 @@ class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.income == null ? 'Add Income' : 'Edit Income'),
+        title: Text(widget.projection == null ? 'Add Projection' : 'Edit Projection'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -143,33 +140,33 @@ class _IncomeEntryScreenState extends State<IncomeEntryScreen> {
                 decoration: const InputDecoration(labelText: 'Remarks'),
               ),
               ListTile(
-                title: const Text('Income Date'),
-                subtitle: Text(_incomeDate != null ? DateFormat('yyyy-MM-dd').format(_incomeDate!) : 'Select date'),
+                title: const Text('Projection Date'),
+                subtitle: Text(_projectionDate != null ? DateFormat('yyyy-MM-dd').format(_projectionDate!) : 'Select date'),
                 trailing: IconButton(
                   icon: const Icon(Icons.calendar_today),
                   onPressed: () async {
                     final picked = await showDatePicker(
                       context: context,
-                      initialDate: _incomeDate ?? globalMonthController.value,
+                      initialDate: _projectionDate ?? globalMonthController.value,
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100),
                     );
                     if (picked != null) {
                       setState(() {
-                        _incomeDate = picked;
+                        _projectionDate = picked;
                       });
                     }
                   },
                 ),
               ),
               ElevatedButton(
-                onPressed: _saveIncome,
+                onPressed: _saveProjection,
                 child: const Text('Save'),
               ),
-              if (_incomeDate == null)
+              if (_projectionDate == null)
                 const Padding(
                   padding: EdgeInsets.only(top: 8.0),
-                  child: Text('Please select an income date', style: TextStyle(color: Colors.red)),
+                  child: Text('Please select a projection date', style: TextStyle(color: Colors.red)),
                 ),
             ],
           ),
