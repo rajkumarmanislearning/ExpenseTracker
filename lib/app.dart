@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/categories_screen.dart';
-import 'screens/payment_status_screen.dart';
-import 'screens/income_screen.dart';
-import 'screens/projections_screen.dart';
-import 'screens/upcoming_payments_screen.dart';
+import 'screens/dashboard/dashboard_screen.dart';
+import 'screens/categories/categories_screen.dart';
+import 'screens/payment_status/payment_status_screen.dart';
+import 'screens/income/income_screen.dart';
+import 'screens/projections/projections_screen.dart';
+import 'screens/upcoming_payments/upcoming_payments_screen.dart';
 
 class FinanceManagementApp extends StatelessWidget {
   const FinanceManagementApp({super.key});
