@@ -15,6 +15,7 @@ void main() {
   DatabaseHelper.initializeSqfliteFactory();
   log('Sqflite factory initialization called');
   runApp(const FinanceManagementApp());
+  log('FinanceManagementApp started');
 }
 
 class FinanceManagementApp extends StatelessWidget {
