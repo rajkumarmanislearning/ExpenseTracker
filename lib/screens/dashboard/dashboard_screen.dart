@@ -97,6 +97,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
+    // --- Modernized Dashboard Layout ---
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -144,7 +145,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              _buildDashboardCards(),
+              // Remove summary bar and use a card view for summary
+              _buildSummaryCardView(context),
+              const SizedBox(height: 16),
+              // _buildDashboardCards(), // Removed as per user request
               const SizedBox(height: 24),
               _buildFuturePaymentsSection(),
               const SizedBox(height: 24),
@@ -158,76 +162,78 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildDashboardCards() {
+  // Replace summary bar with a card view for summary
+  Widget _buildSummaryCardView(BuildContext context) {
+    final balance = _incomeProjected - _projectionsPaid;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Expanded(
-          child: _buildDashboardCard(
-            icon: Icons.attach_money,
-            title: 'Income Received',
-            value: '₹${_incomeProjected.toStringAsFixed(2)}',
-            onTap: () {
-              Navigator.pushNamed(context, '/income');
-            },
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/income'),
+            child: Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              color: Colors.green[50],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                child: Column(
+                  children: [
+                    Icon(Icons.attach_money, color: Colors.green, size: 32),
+                    const SizedBox(height: 8),
+                    Text('Income', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.green)),
+                    const SizedBox(height: 4),
+                    Text('₹${_incomeProjected.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.green)),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
+        const SizedBox(width: 12),
         Expanded(
-          child: _buildDashboardCard(
-            icon: Icons.trending_up,
-            title: 'Projections',
-            value: '₹${_projectionsProjected.toStringAsFixed(2)}',
-            onTap: () {
-              Navigator.pushNamed(context, '/projections');
-            },
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/projections'),
+            child: Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              color: Colors.blue[50],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                child: Column(
+                  children: [
+                    Icon(Icons.payments, color: Colors.blue, size: 32),
+                    const SizedBox(height: 8),
+                    Text('Paid', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.blue)),
+                    const SizedBox(height: 4),
+                    Text('₹${_projectionsPaid.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.blue)),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
+        const SizedBox(width: 12),
         Expanded(
-          child: _buildDashboardCard(
-            icon: Icons.payments,
-            title: 'Paid from Projections',
-            value: '₹${_projectionsPaid.toStringAsFixed(2)}',
-            onTap: () {},
+          child: Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            color: balance >= 0 ? Colors.teal[50] : Colors.red[50],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+              child: Column(
+                children: [
+                  Icon(Icons.account_balance_wallet, color: balance >= 0 ? Colors.teal : Colors.red, size: 32),
+                  const SizedBox(height: 8),
+                  Text('Balance', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: balance >= 0 ? Colors.teal : Colors.red)),
+                  const SizedBox(height: 4),
+                  Text('₹${balance.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: balance >= 0 ? Colors.teal : Colors.red)),
+                ],
+              ),
+            ),
           ),
-        ),       
+        ),
       ],
-    );
-  }
-
-  Widget _buildDashboardCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required VoidCallback onTap,
-  }) {
-    final iconColor = Theme.of(context).colorScheme.primary;
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Theme.of(context).colorScheme.surfaceVariant,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 48, color: iconColor),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -243,38 +249,82 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         SizedBox(
-          height: 120,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _futureProjections.length,
-            itemBuilder: (context, index) {
-              final data = _futureProjections[index];
-              return Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+          height: 140,
+          child: _futureProjections.isEmpty
+              ? Center(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        data['month'],
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
+                      Icon(Icons.event_busy, size: 48, color: Colors.grey[400]),
                       const SizedBox(height: 8),
-                      Text(
-                        '₹${(data['value'] as double).toStringAsFixed(2)}',
-                        style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.secondary),
-                      ),
+                      Text('No future payments found', style: TextStyle(color: Colors.grey[600])),
                     ],
                   ),
+                )
+              : ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _futureProjections.length,
+                  separatorBuilder: (context, index) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final data = _futureProjections[index];
+                    final value = data['value'] as double;
+                    final isZero = value == 0.0;
+                    return Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      color: isZero ? Colors.grey[100] : Colors.amber[50],
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: Container(
+                        width: 180,
+                        constraints: const BoxConstraints(minHeight: 100, maxHeight: 120), // Constrain height
+                        padding: const EdgeInsets.all(8.0), // Slightly reduce padding
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_month, color: Colors.amber[700]),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    data['month'],
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '₹${value.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: isZero ? Colors.grey : Colors.amber[900],
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            isZero
+                                ? Chip(
+                                    label: const Text('No payments'),
+                                    backgroundColor: Colors.grey[200],
+                                    labelStyle: const TextStyle(color: Colors.grey),
+                                  )
+                                : Chip(
+                                    label: const Text('Upcoming'),
+                                    backgroundColor: Colors.amber[100],
+                                    labelStyle: const TextStyle(color: Colors.amber),
+                                  ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
       ],
     );
