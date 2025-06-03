@@ -38,4 +38,15 @@ class PaymentStatusDao {
       whereArgs: [type],
     );
   }
+
+  Future<void> insertOrUpdateFromMap(Map map) async {
+    final db = await DatabaseHelper.database;
+    final id = map['id'];
+    final existing = await db.query(DatabaseHelper.tablePaymentStatus, where: 'id = ?', whereArgs: [id]);
+    if (existing.isEmpty) {
+      await db.insert(DatabaseHelper.tablePaymentStatus, Map<String, dynamic>.from(map));
+    } else {
+      await db.update(DatabaseHelper.tablePaymentStatus, Map<String, dynamic>.from(map), where: 'id = ?', whereArgs: [id]);
+    }
+  }
 }

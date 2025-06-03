@@ -63,6 +63,13 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/upcomingPayments');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.backup),
+            title: const Text('Backup & Restore'),
+            onTap: () {
+              Navigator.pushNamed(context, '/backupRestore');
+            },
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),

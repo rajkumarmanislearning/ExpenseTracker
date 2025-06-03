@@ -5,6 +5,7 @@ import 'package:finance_management/screens/payment_status/payment_status_screen.
 import 'package:finance_management/screens/income/income_screen.dart';
 import 'package:finance_management/screens/projections/projections_screen.dart';
 import 'package:finance_management/screens/upcoming_payments/upcoming_payments_screen.dart';
+import 'package:finance_management/screens/backup_restore_screen.dart';
 import 'package:finance_management/database/database_helper.dart';
 import 'dart:developer';
 
@@ -40,6 +41,7 @@ class FinanceManagementApp extends StatelessWidget {
         '/upcomingPayments': (context) => const UpcomingPaymentsScreen(),
         '/categories': (context) => const CategoriesScreen(),
         '/paymentStatus': (context) => const PaymentStatusScreen(),
+        '/backupRestore': (context) => const BackupRestoreScreen(),
       },
     );
   }

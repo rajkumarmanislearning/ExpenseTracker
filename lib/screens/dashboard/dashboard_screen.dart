@@ -378,7 +378,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         daysColor = Colors.red;
                         daysText = '${daysToPay.abs()} days overdue';
                       } else if (daysToPay == 0) {
-                        daysColor = Colors.yellow;
+                        daysColor = Colors.purple;
                         daysText = 'Due today';
                       } else {
                         daysColor = Colors.green;
@@ -391,7 +391,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Navigator.pushNamed(
                           context,
                           '/projections',
-                          arguments: {'editId': proj['id']},
+                          arguments: {'editId': proj['id'], 'openEntry': true}, // Add a flag to indicate entry screen
                         );
                       },
                       child: Card(
@@ -402,61 +402,78 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: Colors.white,
                         margin: const EdgeInsets.symmetric(vertical: 2),
                         child: Container(
-                          width: 140,
-                          constraints: const BoxConstraints(minHeight: 70, maxHeight: 90),
-                          padding: const EdgeInsets.all(8.0),
+                          width: 130, // Further reduce width to match constraints
+                          constraints: const BoxConstraints(minHeight: 70, maxHeight: 90, maxWidth: 130),
+                          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0), // Further reduce padding
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Balance (first, prominent)
+                              // Description (first)
+                              if (desc.isNotEmpty) ...[
+                                Text(
+                                  desc,
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black54),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 1),
+                              ],
+                              // Category name
                               Row(
                                 children: [
-                                  Icon(Icons.account_balance_wallet, color: balance < 0 ? Colors.red : Colors.teal, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text('₹${balance.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, color: balance < 0 ? Colors.red : Colors.teal, fontSize: 14)),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              // Projected and Paid (compact, no headers)
-                              Row(
-                                children: [
-                                  Icon(Icons.trending_up, color: Colors.blue[300], size: 13),
-                                  const SizedBox(width: 2),
-                                  Text('₹${projected.toStringAsFixed(2)}', style: const TextStyle(fontSize: 11, color: Colors.blue)),
-                                  const SizedBox(width: 6),
-                                  Icon(Icons.check_circle, color: Colors.green[300], size: 13),
-                                  const SizedBox(width: 2),
-                                  Text('₹${paid.toStringAsFixed(2)}', style: const TextStyle(fontSize: 11, color: Colors.green)),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              // Category and desc (very compact)
-                              Row(
-                                children: [
-                                  Icon(Icons.category, color: Colors.grey[400], size: 12),
-                                  const SizedBox(width: 2),
+                                  Icon(Icons.category, color: Colors.grey[400], size: 10),
+                                  const SizedBox(width: 1),
                                   Expanded(
-                                    child: Text(catName, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis),
+                                    child: Text(
+                                      catName,
+                                      style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w500),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      softWrap: false,
+                                    ),
                                   ),
                                 ],
                               ),
-                              if (desc.isNotEmpty) ...[
-                                const SizedBox(height: 1),
-                                Text(desc, style: const TextStyle(fontSize: 10, color: Colors.black54), maxLines: 1, overflow: TextOverflow.ellipsis),
-                              ],
                               const SizedBox(height: 2),
-                              // Date and days left/overdue
+                              // Days left/overdue
+                              Row(
+                                children: [
+                                  Icon(Icons.timer, size: 11, color: daysColor),
+                                  const SizedBox(width: 2),
+                                  Text(daysText, style: TextStyle(fontSize: 9, color: daysColor)),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              // Projection date
                               Row(
                                 children: [
                                   Icon(Icons.calendar_today, size: 11, color: Colors.grey[400]),
                                   const SizedBox(width: 2),
                                   Text(projDateStr, style: const TextStyle(fontSize: 9, color: Colors.grey)),
-                                  const SizedBox(width: 6),
-                                  Icon(Icons.timer, size: 11, color: daysColor),
-                                  const SizedBox(width: 2),
-                                  Text(daysText, style: TextStyle(fontSize: 9, color: daysColor)),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              // Balance (last)
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/projections',
+                                        arguments: {'editId': proj['id'], 'openEntry': true}, // Add a flag to indicate entry screen
+                                      );
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.account_balance_wallet, color: balance < 0 ? Colors.red : Colors.teal, size: 16),
+                                        const SizedBox(width: 4),
+                                        Text('₹${balance.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, color: balance < 0 ? Colors.red : Colors.teal, fontSize: 14)),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -475,74 +492,79 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text(
-            'Upcoming Day(s) Payments',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _upcomingPayments.length,
-          itemBuilder: (context, index) {
-            final pay = _upcomingPayments[index];
-            final catName = _categoryNames[pay['category_id']] ?? '';
-            final desc = pay['description'] ?? '';
-            final fromDateStr = pay['upcoming_from_date'] ?? '';
-            final renewalDateStr = pay['renewal_date'] ?? '';
-            final projected = pay['projected_amount'] is int ? (pay['projected_amount'] as int).toDouble() : (pay['projected_amount'] ?? 0.0);
-            final paid = pay['amount_paid'] is int ? (pay['amount_paid'] as int).toDouble() : (pay['amount_paid'] ?? 0.0);
-            final status = pay['payment_status_name'] ?? '';
-            final fromDate = fromDateStr != '' ? DateTime.tryParse(fromDateStr) : null;
-            int daysToGo = 0;
-            Color daysColor = Colors.green;
-            if (fromDate != null) {
-              daysToGo = fromDate.difference(DateTime.now()).inDays;
-              if (daysToGo < 0) {
-                daysColor = Colors.red;
-              } else {
-                daysColor = Colors.green;
-              }
-            }
-            return Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, '/upcoming_payments', arguments: {'editId': pay['id']});
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(catName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Text(desc),
-                      const SizedBox(height: 8),
-                      Text('Upcoming Date: $fromDateStr'),
-                      const SizedBox(height: 8),
-                      Text('Renewal Date: $renewalDateStr'),
-                      const SizedBox(height: 8),
-                      Text('Projected Amount: ₹${projected.toStringAsFixed(2)}'),
-                      const SizedBox(height: 8),
-                      Text('Amount Paid: ₹${paid.toStringAsFixed(2)}'),
-                      const SizedBox(height: 8),
-                      Text('Status: $status'),
-                      const SizedBox(height: 8),
-                      Text('Days to go: $daysToGo', style: TextStyle(color: daysColor)),
-                    ],
+        // Removed header text
+        if (_upcomingPayments.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Text('No upcoming payments'),
+          )
+        else
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: _upcomingPayments.map((pay) {
+                final catName = _categoryNames[pay['category_id']] ?? '';
+                final desc = pay['description'] ?? '';
+                final fromDateStr = pay['upcoming_from_date'] ?? '';
+                final projected = pay['projected_amount'] is int ? (pay['projected_amount'] as int).toDouble() : (pay['projected_amount'] ?? 0.0);
+                final paid = pay['amount_paid'] is int ? (pay['amount_paid'] as int).toDouble() : (pay['amount_paid'] ?? 0.0);
+                final status = pay['payment_status_name'] ?? '';
+                final fromDate = fromDateStr != '' ? DateTime.tryParse(fromDateStr) : null;
+                int daysToGo = 0;
+                Color daysColor = Colors.green;
+                if (fromDate != null) {
+                  daysToGo = fromDate.difference(DateTime.now()).inDays;
+                  if (daysToGo < 0) {
+                    daysColor = Colors.red;
+                  } else {
+                    daysColor = Colors.green;
+                  }
+                }
+                return InkWell(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/upcomingPayments', arguments: {'editId': pay['id'], 'openEntry': true});
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.payments, color: daysColor, size: 20),
+                        const SizedBox(width: 6),
+                        Text(catName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        if (desc.isNotEmpty) ...[
+                          const SizedBox(width: 6),
+                          Text(desc, style: const TextStyle(color: Colors.black54)),
+                        ],
+                        const SizedBox(width: 6),
+                        Text('₹${projected.toStringAsFixed(0)}', style: const TextStyle(color: Colors.teal)),
+                        const SizedBox(width: 6),
+                        Text('₹${paid.toStringAsFixed(0)}', style: const TextStyle(color: Colors.blue)),
+                        const SizedBox(width: 6),
+                        Text('Due: $fromDateStr', style: const TextStyle(color: Colors.deepOrange)),
+                        const SizedBox(width: 6),
+                        Text('$status', style: TextStyle(color: daysColor)),
+                        const SizedBox(width: 6),
+                        Text('Days to go: $daysToGo', style: TextStyle(color: daysColor, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            );
-          },
-        ),       
+                );
+              }).toList(),
+            ),
+          ),
       ],
     );
   }

@@ -33,4 +33,20 @@ class UpcomingPaymentsDao {
       whereArgs: [id],
     );
   }
+
+  Future<List<Map<String, dynamic>>> getAllUpcomingPayments() async {
+    final db = await DatabaseHelper.database;
+    return db.query(DatabaseHelper.tableUpcomingPayments);
+  }
+
+  Future<void> insertOrUpdateFromMap(Map map) async {
+    final db = await DatabaseHelper.database;
+    final id = map['id'];
+    final existing = await db.query(DatabaseHelper.tableUpcomingPayments, where: 'id = ?', whereArgs: [id]);
+    if (existing.isEmpty) {
+      await db.insert(DatabaseHelper.tableUpcomingPayments, Map<String, dynamic>.from(map));
+    } else {
+      await db.update(DatabaseHelper.tableUpcomingPayments, Map<String, dynamic>.from(map), where: 'id = ?', whereArgs: [id]);
+    }
+  }
 }

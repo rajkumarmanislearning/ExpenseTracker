@@ -42,6 +42,30 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Check for direct entry open request
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map && args['editId'] != null && args['openEntry'] == true) {
+      final record = _projectionsRecords.firstWhere(
+        (r) => r['id'] == args['editId'],
+        orElse: () => {},
+      );
+      if (record.isNotEmpty) {
+        // Open the entry screen and clear the flag to avoid repeated opening
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProjectionsEntryScreen(projection: record),
+            ),
+          );
+          // Optionally reload projections after edit
+          _loadProjections();
+        });
+        // Remove the flag so it doesn't open again on rebuild
+        args['openEntry'] = false;
+      }
+    }
+
     double totalProjected = 0;
     double totalPaid = 0;
     for (final record in _projectionsRecords) {

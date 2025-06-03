@@ -33,4 +33,20 @@ class IncomeDao {
       whereArgs: [id],
     );
   }
+
+  Future<List<Map<String, dynamic>>> getAllIncome() async {
+    final db = await DatabaseHelper.database;
+    return db.query(DatabaseHelper.tableIncome);
+  }
+
+  Future<void> insertOrUpdateFromMap(Map map) async {
+    final db = await DatabaseHelper.database;
+    final id = map['id'];
+    final existing = await db.query(DatabaseHelper.tableIncome, where: 'id = ?', whereArgs: [id]);
+    if (existing.isEmpty) {
+      await db.insert(DatabaseHelper.tableIncome, Map<String, dynamic>.from(map));
+    } else {
+      await db.update(DatabaseHelper.tableIncome, Map<String, dynamic>.from(map), where: 'id = ?', whereArgs: [id]);
+    }
+  }
 }
