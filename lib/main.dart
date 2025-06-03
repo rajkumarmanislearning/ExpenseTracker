@@ -12,10 +12,10 @@ import 'dart:developer';
 final ValueNotifier<DateTime> globalMonthController = ValueNotifier<DateTime>(DateTime.now());
 
 void main() {
-  DatabaseHelper.initializeSqfliteFactory();
-  log('Sqflite factory initialization called');
+  //DatabaseHelper.initializeSqfliteFactory();
+  //log('Sqflite factory initialization called');
   runApp(const FinanceManagementApp());
-  log('FinanceManagementApp started');
+  //log('FinanceManagementApp started');
 }
 
 class FinanceManagementApp extends StatelessWidget {
