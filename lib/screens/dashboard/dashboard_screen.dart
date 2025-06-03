@@ -340,71 +340,132 @@ class _DashboardScreenState extends State<DashboardScreen> {
           padding: EdgeInsets.all(16.0),
           child: Text(
             'Current Month Settlement',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
         SizedBox(
-          height: 180,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _currentMonthProjections.length,
-            itemBuilder: (context, index) {
-              final proj = _currentMonthProjections[index];
-              final desc = proj['description'] ?? '';
-              final catName = _categoryNames[proj['category_id']] ?? '';
-              final projDateStr = proj['projection_date'] ?? '';
-              final projDate = projDateStr != '' ? DateTime.tryParse(projDateStr) : null;
-              final projected = proj['projected_amount'] is int ? (proj['projected_amount'] as int).toDouble() : (proj['projected_amount'] ?? 0.0);
-              final paid = proj['amount_paid'] is int ? (proj['amount_paid'] as int).toDouble() : (proj['amount_paid'] ?? 0.0);
-              final balance = projected - paid;
-              int daysToPay = 0;
-              Color daysColor = Colors.green;
-              String daysText = '';
-              if (projDate != null) {
-                daysToPay = projDate.difference(DateTime.now()).inDays;
-                if (daysToPay < 0) {
-                  daysColor = Colors.red;
-                  daysText = '${daysToPay.abs()} days overdue';
-                } else if (daysToPay == 0) {
-                  daysColor = Colors.yellow;
-                  daysText = 'Due today';
-                } else {
-                  daysColor = Colors.green;
-                  daysText = '$daysToPay days left';
-                }
-              }
-              return Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/projections', arguments: {'editId': proj['id']});
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(desc, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 8),
-                        Text(catName),
-                        const SizedBox(height: 8),
-                        Text('Projection Date: ${projDateStr ?? ''}'),
-                        const SizedBox(height: 8),
-                        Text('Balance: ₹${balance.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 8),
-                        Text(daysText, style: TextStyle(color: daysColor)),
-                      ],
-                    ),
+          height: 100, // More compact
+          child: _currentMonthProjections.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.event_note, size: 28, color: Colors.grey[400]),
+                      const SizedBox(height: 4),
+                      Text('No unsettled projections', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                    ],
                   ),
+                )
+              : ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _currentMonthProjections.length,
+                  separatorBuilder: (context, index) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final proj = _currentMonthProjections[index];
+                    final desc = proj['description'] ?? '';
+                    final catName = _categoryNames[proj['category_id']] ?? '';
+                    final projDateStr = proj['projection_date'] ?? '';
+                    final projDate = projDateStr != '' ? DateTime.tryParse(projDateStr) : null;
+                    final projected = proj['projected_amount'] is int ? (proj['projected_amount'] as int).toDouble() : (proj['projected_amount'] ?? 0.0);
+                    final paid = proj['amount_paid'] is int ? (proj['amount_paid'] as int).toDouble() : (proj['amount_paid'] ?? 0.0);
+                    final balance = projected - paid;
+                    int daysToPay = 0;
+                    Color daysColor = Colors.green;
+                    String daysText = '';
+                    if (projDate != null) {
+                      daysToPay = projDate.difference(DateTime.now()).inDays;
+                      if (daysToPay < 0) {
+                        daysColor = Colors.red;
+                        daysText = '${daysToPay.abs()} days overdue';
+                      } else if (daysToPay == 0) {
+                        daysColor = Colors.yellow;
+                        daysText = 'Due today';
+                      } else {
+                        daysColor = Colors.green;
+                        daysText = '$daysToPay days left';
+                      }
+                    }
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/projections',
+                          arguments: {'editId': proj['id']},
+                        );
+                      },
+                      child: Card(
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        color: Colors.white,
+                        margin: const EdgeInsets.symmetric(vertical: 2),
+                        child: Container(
+                          width: 140,
+                          constraints: const BoxConstraints(minHeight: 70, maxHeight: 90),
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Balance (first, prominent)
+                              Row(
+                                children: [
+                                  Icon(Icons.account_balance_wallet, color: balance < 0 ? Colors.red : Colors.teal, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text('₹${balance.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, color: balance < 0 ? Colors.red : Colors.teal, fontSize: 14)),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              // Projected and Paid (compact, no headers)
+                              Row(
+                                children: [
+                                  Icon(Icons.trending_up, color: Colors.blue[300], size: 13),
+                                  const SizedBox(width: 2),
+                                  Text('₹${projected.toStringAsFixed(2)}', style: const TextStyle(fontSize: 11, color: Colors.blue)),
+                                  const SizedBox(width: 6),
+                                  Icon(Icons.check_circle, color: Colors.green[300], size: 13),
+                                  const SizedBox(width: 2),
+                                  Text('₹${paid.toStringAsFixed(2)}', style: const TextStyle(fontSize: 11, color: Colors.green)),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              // Category and desc (very compact)
+                              Row(
+                                children: [
+                                  Icon(Icons.category, color: Colors.grey[400], size: 12),
+                                  const SizedBox(width: 2),
+                                  Expanded(
+                                    child: Text(catName, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis),
+                                  ),
+                                ],
+                              ),
+                              if (desc.isNotEmpty) ...[
+                                const SizedBox(height: 1),
+                                Text(desc, style: const TextStyle(fontSize: 10, color: Colors.black54), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              ],
+                              const SizedBox(height: 2),
+                              // Date and days left/overdue
+                              Row(
+                                children: [
+                                  Icon(Icons.calendar_today, size: 11, color: Colors.grey[400]),
+                                  const SizedBox(width: 2),
+                                  Text(projDateStr, style: const TextStyle(fontSize: 9, color: Colors.grey)),
+                                  const SizedBox(width: 6),
+                                  Icon(Icons.timer, size: 11, color: daysColor),
+                                  const SizedBox(width: 2),
+                                  Text(daysText, style: TextStyle(fontSize: 9, color: daysColor)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
       ],
     );

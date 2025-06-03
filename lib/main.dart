@@ -12,8 +12,11 @@ import 'dart:developer';
 final ValueNotifier<DateTime> globalMonthController = ValueNotifier<DateTime>(DateTime.now());
 
 void main() {
-  //DatabaseHelper.initializeSqfliteFactory();
-  //log('Sqflite factory initialization called');
+  assert(() {
+    DatabaseHelper.initializeSqfliteFactory();
+    log('Sqflite factory initialization called');
+    return true;
+  }());
   runApp(const FinanceManagementApp());
   //log('FinanceManagementApp started');
 }
