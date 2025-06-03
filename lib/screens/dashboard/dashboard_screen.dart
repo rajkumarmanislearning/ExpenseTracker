@@ -176,21 +176,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               color: Colors.green[50],
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4), // Reduced padding
                 child: Column(
                   children: [
-                    Icon(Icons.attach_money, color: Colors.green, size: 32),
-                    const SizedBox(height: 8),
-                    Text('Income', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.green)),
+                    Icon(Icons.attach_money, color: Colors.green, size: 24), // Smaller icon
                     const SizedBox(height: 4),
-                    Text('₹${_incomeProjected.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.green)),
+                    Text('Income', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.green, fontSize: 13)), // Smaller font
+                    const SizedBox(height: 2),
+                    Text('₹${_incomeProjected.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 15)), // Smaller font
                   ],
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           child: GestureDetector(
             onTap: () => Navigator.pushNamed(context, '/projections'),
@@ -199,35 +199,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               color: Colors.blue[50],
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                 child: Column(
                   children: [
-                    Icon(Icons.payments, color: Colors.blue, size: 32),
-                    const SizedBox(height: 8),
-                    Text('Paid', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.blue)),
+                    Icon(Icons.payments, color: Colors.blue, size: 24),
                     const SizedBox(height: 4),
-                    Text('₹${_projectionsPaid.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.blue)),
+                    Text('Paid', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.blue, fontSize: 13)),
+                    const SizedBox(height: 2),
+                    Text('₹${_projectionsPaid.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 15)),
                   ],
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           child: Card(
             elevation: 2,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             color: balance >= 0 ? Colors.teal[50] : Colors.red[50],
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
               child: Column(
                 children: [
-                  Icon(Icons.account_balance_wallet, color: balance >= 0 ? Colors.teal : Colors.red, size: 32),
-                  const SizedBox(height: 8),
-                  Text('Balance', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: balance >= 0 ? Colors.teal : Colors.red)),
+                  Icon(Icons.account_balance_wallet, color: balance >= 0 ? Colors.teal : Colors.red, size: 24),
                   const SizedBox(height: 4),
-                  Text('₹${balance.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: balance >= 0 ? Colors.teal : Colors.red)),
+                  Text('Balance', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: balance >= 0 ? Colors.teal : Colors.red, fontSize: 13)),
+                  const SizedBox(height: 2),
+                  Text('₹${balance.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: balance >= 0 ? Colors.teal : Colors.red, fontSize: 15)),
                 ],
               ),
             ),
@@ -245,26 +245,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
           padding: EdgeInsets.all(16.0),
           child: Text(
             'Future Payments',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Slightly smaller
           ),
         ),
         SizedBox(
-          height: 140,
+          height: 110, // Reduced height
           child: _futureProjections.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.event_busy, size: 48, color: Colors.grey[400]),
-                      const SizedBox(height: 8),
-                      Text('No future payments found', style: TextStyle(color: Colors.grey[600])),
+                      Icon(Icons.event_busy, size: 32, color: Colors.grey[400]), // Smaller icon
+                      const SizedBox(height: 4),
+                      Text('No future payments found', style: TextStyle(color: Colors.grey[600], fontSize: 13)), // Smaller font
                     ],
                   ),
                 )
               : ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: _futureProjections.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 12),
+                  separatorBuilder: (context, index) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
                     final data = _futureProjections[index];
                     final value = data['value'] as double;
@@ -275,11 +275,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       color: isZero ? Colors.grey[100] : Colors.amber[50],
-                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      margin: const EdgeInsets.symmetric(vertical: 2),
                       child: Container(
-                        width: 180,
-                        constraints: const BoxConstraints(minHeight: 100, maxHeight: 120), // Constrain height
-                        padding: const EdgeInsets.all(8.0), // Slightly reduce padding
+                        width: 140, // Smaller card
+                        constraints: const BoxConstraints(minHeight: 80, maxHeight: 100),
+                        padding: const EdgeInsets.all(6.0), // Smaller padding
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -287,37 +287,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.calendar_month, color: Colors.amber[700]),
-                                const SizedBox(width: 8),
+                                Icon(Icons.calendar_month, color: Colors.amber[700], size: 18), // Smaller icon
+                                const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
                                     data['month'],
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 4),
                             Text(
                               '₹${value.toStringAsFixed(2)}',
                               style: TextStyle(
-                                fontSize: 22,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: isZero ? Colors.grey : Colors.amber[900],
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 2),
                             isZero
                                 ? Chip(
-                                    label: const Text('No payments'),
+                                    label: const Text('No payments', style: TextStyle(fontSize: 10)),
                                     backgroundColor: Colors.grey[200],
                                     labelStyle: const TextStyle(color: Colors.grey),
+                                    visualDensity: VisualDensity.compact,
                                   )
                                 : Chip(
-                                    label: const Text('Upcoming'),
+                                    label: const Text('Upcoming', style: TextStyle(fontSize: 10)),
                                     backgroundColor: Colors.amber[100],
                                     labelStyle: const TextStyle(color: Colors.amber),
+                                    visualDensity: VisualDensity.compact,
                                   ),
                           ],
                         ),
