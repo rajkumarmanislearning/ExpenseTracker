@@ -128,19 +128,22 @@ class BackupRestoreService {
   /// Save backup to a custom file path
   Future<void> backupToExcelCustomPath(String? filePath, {void Function(String)? onDebugInfo}) async {
     final excel = Excel.createExcel();
+
+    // Remove default "Sheet1" if not used
+    excel.delete('Sheet1');
     // Category Sheet
     final categories = await _categoryDao.getAllCategories();
-    final categorySheet = excel['Category'];
     if (categories.isNotEmpty) {
+      final categorySheet = excel['Category'];
       categorySheet.appendRow(categories.first.keys.toList());
       for (final row in categories) {
         categorySheet.appendRow(row.values.toList());
       }
     }
     // Payment Status Sheet
-    final paymentStatuses = await _paymentStatusDao.getAllPaymentStatuses();
-    final paymentStatusSheet = excel['Payments Status'];
+    final paymentStatuses = await _paymentStatusDao.getAllPaymentStatuses();    
     if (paymentStatuses.isNotEmpty) {
+      final paymentStatusSheet = excel['Payments Status'];
       paymentStatusSheet.appendRow(paymentStatuses.first.keys.toList());
       for (final row in paymentStatuses) {
         paymentStatusSheet.appendRow(row.values.toList());
@@ -148,70 +151,75 @@ class BackupRestoreService {
     }
     // Projections Sheet
     final projections = await _projectionsDao.getAllProjections();
-    final projectionsSheet = excel['Projections'];
+    
     if (projections.isNotEmpty) {
+      final projectionsSheet = excel['Projections'];
       projectionsSheet.appendRow(projections.first.keys.toList());
       for (final row in projections) {
         projectionsSheet.appendRow(row.values.toList());
       }
     }
     // Income Sheet
-    final incomes = await _incomeDao.getAllIncome();
-    final incomeSheet = excel['Income'];
+    final incomes = await _incomeDao.getAllIncome();    
     if (incomes.isNotEmpty) {
+      final incomeSheet = excel['Income'];
       incomeSheet.appendRow(incomes.first.keys.toList());
       for (final row in incomes) {
         incomeSheet.appendRow(row.values.toList());
       }
     }
     // Upcoming Payments Sheet
-    final upcomingPayments = await _upcomingPaymentsDao.getAllUpcomingPayments();
-    final upcomingSheet = excel['Upcoming Payments'];
+    final upcomingPayments = await _upcomingPaymentsDao.getAllUpcomingPayments();    
     if (upcomingPayments.isNotEmpty) {
+      final upcomingSheet = excel['Upcoming Payments'];
       upcomingSheet.appendRow(upcomingPayments.first.keys.toList());
       for (final row in upcomingPayments) {
         upcomingSheet.appendRow(row.values.toList());
       }
     }
-    // Debug: Collect sheet and row info
-    final buffer = StringBuffer('Excel sheets:\n');
-    for (var sheet in excel.tables.keys) {
-      buffer.writeln('Sheet: $sheet, Rows: \\${excel.tables[sheet]?.rows.length}');
+     // Debug Info
+  final buffer = StringBuffer('Excel sheets:\n');
+  for (var sheet in excel.tables.keys) {
+    buffer.writeln('Sheet: $sheet, Rows: ${excel.tables[sheet]?.rows.length}');
+  }
+  final debugInfo = buffer.toString();
+  onDebugInfo?.call(debugInfo);
+
+  // Check if any data exists
+  final hasData = excel.tables.values.any((sheet) => sheet.rows.isNotEmpty);
+  if (!hasData) {
+    onDebugInfo?.call('No data found in any sheet. Backup aborted.');
+    throw Exception('No data found in any sheet. Backup aborted.');
+  }
+
+  // Get path
+  String? savePath = filePath;
+  if (savePath == null || savePath.isEmpty) {
+    savePath = await FilePicker.platform.saveFile(
+      dialogTitle: 'Select location to save backup',
+      fileName: 'finance_backup_${DateTime.now().millisecondsSinceEpoch}.xlsx',
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+    if (savePath == null) {
+      onDebugInfo?.call('No file path selected for backup');
+      throw Exception('No file path selected for backup');
     }
-    final debugInfo = buffer.toString();
-    if (onDebugInfo != null) onDebugInfo(debugInfo);
-    // Defensive: Ensure at least one sheet has data
-    final hasData = excel.tables.values.any((sheet) => sheet.rows.isNotEmpty);
-    if (!hasData) {
-      if (onDebugInfo != null) onDebugInfo('No data found in any sheet. Backup aborted.');
-      throw Exception('No data found in any sheet. Backup aborted.');
-    }
-    // Save file to custom path
-    String? savePath = filePath;
-    if (savePath == null || savePath.isEmpty) {
-      savePath = await FilePicker.platform.saveFile(
-        dialogTitle: 'Select location to save backup',
-        fileName: 'finance_backup_${DateTime.now().millisecondsSinceEpoch}.xlsx',
-        type: FileType.custom,
-        allowedExtensions: ['xlsx'],
-      );
-      if (savePath == null) {
-        if (onDebugInfo != null) onDebugInfo('No file path selected for backup');
-        throw Exception('No file path selected for backup');
-      }
-    }
-    final file = File(savePath);
-    final bytes = excel.encode();
-    if (onDebugInfo != null) onDebugInfo('Excel encode bytes: \\${bytes?.length ?? 'null'}');
-    if (bytes == null) {
-      final err = 'Failed to encode Excel file. Sheet row counts: ' +
-        excel.tables.keys.map((k) => '$k=\\${excel.tables[k]?.rows.length}').join(', ') +
+  }
+
+  // Encode and save
+  final bytes = excel.encode();
+  if (bytes == null) {
+    final err = 'Failed to encode Excel file. Sheet row counts: ' +
+        excel.tables.keys.map((k) => '$k=${excel.tables[k]?.rows.length}').join(', ') +
         '. This may indicate an API mismatch with the excel package or empty sheets.';
-      if (onDebugInfo != null) onDebugInfo(err);
-      throw Exception(err);
-    }
-    await file.writeAsBytes(bytes, flush: true);
-    if (onDebugInfo != null) onDebugInfo('Backup written to: $savePath');
+    onDebugInfo?.call(err);
+    throw Exception(err);
+  }
+
+  final file = File(savePath);
+  await file.writeAsBytes(bytes, flush: true);
+  onDebugInfo?.call('Backup written to: $savePath');
   }
 
   dynamic _parseField(dynamic value) {
