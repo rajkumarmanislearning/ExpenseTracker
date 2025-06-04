@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
 import '../services/backup_restore_service.dart';
 
 class BackupRestoreScreen extends StatefulWidget {
@@ -18,10 +19,20 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
   Future<void> _backup() async {
     setState(() { _loading = true; _message = null; _backupFilePath = null; });
     try {
-      final filePath = await _service.backupToExcelWithPath();
+      String? savePath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Select location to save backup Excel file',
+        fileName: 'finance_backup_${DateTime.now().millisecondsSinceEpoch}.xlsx',
+        type: FileType.custom,
+        allowedExtensions: ['xlsx'],
+      );
+      if (savePath == null) {
+        setState(() { _loading = false; _message = 'Backup cancelled.'; });
+        return;
+      }
+      await _service.backupToExcelCustomPath(savePath);
       setState(() {
-        _backupFilePath = filePath;
-        _message = 'Backup completed. File saved to:';
+        _backupFilePath = savePath;
+        _message = '';
       });
     } catch (e) {
       setState(() { _message = 'Backup failed: $e'; });

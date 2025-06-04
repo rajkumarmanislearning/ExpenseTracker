@@ -125,6 +125,59 @@ class BackupRestoreService {
     return filePath;
   }
 
+  /// Save backup to a custom file path
+  Future<void> backupToExcelCustomPath(String filePath) async {
+    final excel = Excel.createExcel();
+    // Category Sheet
+    final categories = await _categoryDao.getAllCategories();
+    final categorySheet = excel['Category'];
+    if (categories.isNotEmpty) {
+      categorySheet.appendRow(categories.first.keys.toList());
+      for (final row in categories) {
+        categorySheet.appendRow(row.values.toList());
+      }
+    }
+    // Payment Status Sheet
+    final paymentStatuses = await _paymentStatusDao.getAllPaymentStatuses();
+    final paymentStatusSheet = excel['Payments Status'];
+    if (paymentStatuses.isNotEmpty) {
+      paymentStatusSheet.appendRow(paymentStatuses.first.keys.toList());
+      for (final row in paymentStatuses) {
+        paymentStatusSheet.appendRow(row.values.toList());
+      }
+    }
+    // Projections Sheet
+    final projections = await _projectionsDao.getAllProjections();
+    final projectionsSheet = excel['Projections'];
+    if (projections.isNotEmpty) {
+      projectionsSheet.appendRow(projections.first.keys.toList());
+      for (final row in projections) {
+        projectionsSheet.appendRow(row.values.toList());
+      }
+    }
+    // Income Sheet
+    final incomes = await _incomeDao.getAllIncome();
+    final incomeSheet = excel['Income'];
+    if (incomes.isNotEmpty) {
+      incomeSheet.appendRow(incomes.first.keys.toList());
+      for (final row in incomes) {
+        incomeSheet.appendRow(row.values.toList());
+      }
+    }
+    // Upcoming Payments Sheet
+    final upcomingPayments = await _upcomingPaymentsDao.getAllUpcomingPayments();
+    final upcomingSheet = excel['Upcoming Payments'];
+    if (upcomingPayments.isNotEmpty) {
+      upcomingSheet.appendRow(upcomingPayments.first.keys.toList());
+      for (final row in upcomingPayments) {
+        upcomingSheet.appendRow(row.values.toList());
+      }
+    }
+    // Save file to custom path
+    final file = File(filePath);
+    await file.writeAsBytes(excel.encode()!);
+  }
+
   dynamic _parseField(dynamic value) {
     if (value == null) return null;
     if (value is int || value is double) return value;
