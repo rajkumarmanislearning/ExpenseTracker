@@ -4,7 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import '../services/backup_restore_service.dart';
 
 class BackupRestoreScreen extends StatefulWidget {
-  const BackupRestoreScreen({Key? key}) : super(key: key);
+  const BackupRestoreScreen({super.key});
 
   @override
   State<BackupRestoreScreen> createState() => _BackupRestoreScreenState();

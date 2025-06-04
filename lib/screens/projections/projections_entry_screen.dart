@@ -7,7 +7,7 @@ import '../../main.dart';
 
 class ProjectionsEntryScreen extends StatefulWidget {
   final Map<String, dynamic>? projection;
-  const ProjectionsEntryScreen({Key? key, this.projection}) : super(key: key);
+  const ProjectionsEntryScreen({super.key, this.projection});
 
   @override
   State<ProjectionsEntryScreen> createState() => _ProjectionsEntryScreenState();

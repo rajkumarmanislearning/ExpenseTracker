@@ -170,7 +170,7 @@ class _UpcomingPaymentsScreenState extends State<UpcomingPaymentsScreen> {
             ),
           ),
           Container(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

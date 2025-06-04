@@ -4,7 +4,7 @@ import '../../database/dao/payment_status_dao.dart';
 class PaymentStatusEntryScreen extends StatefulWidget {
   final Map<String, dynamic>? status;
 
-  const PaymentStatusEntryScreen({Key? key, this.status}) : super(key: key);
+  const PaymentStatusEntryScreen({super.key, this.status});
 
   @override
   State<PaymentStatusEntryScreen> createState() => _PaymentStatusEntryScreenState();

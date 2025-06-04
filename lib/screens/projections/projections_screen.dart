@@ -124,7 +124,7 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
                 return Card(
                   elevation: 3,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: ListTile(
                     leading: Icon(Icons.category, color: Colors.blue),
                     title: Text(record['description'] ?? record['category_name'] ?? 'No Description', style: Theme.of(context).textTheme.titleMedium),
@@ -171,7 +171,7 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
             ),
           ),
           Container(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

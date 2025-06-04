@@ -8,7 +8,7 @@ import '../../main.dart';
 class IncomeEntryScreen extends StatefulWidget {
   final Map<String, dynamic>? income;
 
-  const IncomeEntryScreen({Key? key, this.income}) : super(key: key);
+  const IncomeEntryScreen({super.key, this.income});
 
   @override
   State<IncomeEntryScreen> createState() => _IncomeEntryScreenState();

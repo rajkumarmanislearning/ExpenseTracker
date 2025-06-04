@@ -8,11 +8,11 @@ class MonthControllerBar extends StatelessWidget {
   final VoidCallback? onTap;
 
   const MonthControllerBar({
-    Key? key,
+    super.key,
     required this.selectedMonth,
     required this.onMonthChanged,
     this.onTap,
-  }) : super(key: key);
+  });
 
   void _goToPreviousMonth() {
     final prevMonth = DateTime(selectedMonth.year, selectedMonth.month - 1);
@@ -27,7 +27,7 @@ class MonthControllerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.surfaceVariant,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

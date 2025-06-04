@@ -7,7 +7,7 @@ import '../../main.dart';
 
 class UpcomingPaymentsEntryScreen extends StatefulWidget {
   final Map<String, dynamic>? payment;
-  const UpcomingPaymentsEntryScreen({Key? key, this.payment}) : super(key: key);
+  const UpcomingPaymentsEntryScreen({super.key, this.payment});
 
   @override
   State<UpcomingPaymentsEntryScreen> createState() => _UpcomingPaymentsEntryScreenState();

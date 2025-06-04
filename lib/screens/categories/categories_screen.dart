@@ -65,7 +65,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 return Card(
                   elevation: 3,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: ListTile(
                     leading: Icon(Icons.category, color: Colors.deepPurple),
                     title: Text(category['name'], style: Theme.of(context).textTheme.titleMedium),
