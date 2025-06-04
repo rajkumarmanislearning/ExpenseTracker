@@ -175,7 +175,11 @@ class BackupRestoreService {
     }
     // Save file to custom path
     final file = File(filePath);
-    await file.writeAsBytes(excel.encode()!);
+    final bytes = excel.encode();
+    if (bytes == null) {
+      throw Exception('Failed to encode Excel file');
+    }
+    await file.writeAsBytes(List<int>.from(bytes), flush: true);
   }
 
   dynamic _parseField(dynamic value) {
