@@ -179,7 +179,7 @@ class BackupRestoreService {
     if (bytes == null) {
       throw Exception('Failed to encode Excel file');
     }
-    await file.writeAsBytes(List<int>.from(bytes), flush: true);
+    await file.writeAsBytes(bytes, flush: true);
   }
 
   dynamic _parseField(dynamic value) {
