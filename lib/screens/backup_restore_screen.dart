@@ -15,9 +15,10 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
   bool _loading = false;
   String? _message;
   String? _backupFilePath;
+  String? _debugInfo; // <-- Add this line
 
   Future<void> _backup() async {
-    setState(() { _loading = true; _message = null; _backupFilePath = null; });
+    setState(() { _loading = true; _message = null; _backupFilePath = null; _debugInfo = null; });
     try {
       String? savePath = await FilePicker.platform.saveFile(
         dialogTitle: 'Select location to save backup Excel file',
@@ -29,7 +30,12 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
         setState(() { _loading = false; _message = 'Backup cancelled.'; });
         return;
       }
-      await _service.backupToExcelCustomPath(savePath);
+      await _service.backupToExcelCustomPath(
+        savePath,
+        onDebugInfo: (info) {
+          setState(() { _debugInfo = info; });
+        },
+      );
       setState(() {
         _backupFilePath = savePath;
         _message = '';
@@ -98,9 +104,22 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                     },
                   ),
                 ]
-                else ...[
-                  Text(_message!, style: const TextStyle(fontSize: 16)),
-                ],
+              ],
+              if (_debugInfo != null) ...[
+                const SizedBox(height: 24),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _debugInfo!,
+                    style: const TextStyle(fontFamily: 'monospace', fontSize: 13, color: Colors.black87),
+                  ),
+                ),
               ],
             ],
           ),

@@ -126,7 +126,7 @@ class BackupRestoreService {
   }
 
   /// Save backup to a custom file path
-  Future<void> backupToExcelCustomPath(String filePath) async {
+  Future<void> backupToExcelCustomPath(String? filePath, {void Function(String)? onDebugInfo}) async {
     final excel = Excel.createExcel();
     // Category Sheet
     final categories = await _categoryDao.getAllCategories();
@@ -173,13 +173,45 @@ class BackupRestoreService {
         upcomingSheet.appendRow(row.values.toList());
       }
     }
+    // Debug: Collect sheet and row info
+    final buffer = StringBuffer('Excel sheets:\n');
+    for (var sheet in excel.tables.keys) {
+      buffer.writeln('Sheet: $sheet, Rows: \\${excel.tables[sheet]?.rows.length}');
+    }
+    final debugInfo = buffer.toString();
+    if (onDebugInfo != null) onDebugInfo(debugInfo);
+    // Defensive: Ensure at least one sheet has data
+    final hasData = excel.tables.values.any((sheet) => sheet.rows.isNotEmpty);
+    if (!hasData) {
+      if (onDebugInfo != null) onDebugInfo('No data found in any sheet. Backup aborted.');
+      throw Exception('No data found in any sheet. Backup aborted.');
+    }
     // Save file to custom path
-    final file = File(filePath);
+    String? savePath = filePath;
+    if (savePath == null || savePath.isEmpty) {
+      savePath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Select location to save backup',
+        fileName: 'finance_backup_${DateTime.now().millisecondsSinceEpoch}.xlsx',
+        type: FileType.custom,
+        allowedExtensions: ['xlsx'],
+      );
+      if (savePath == null) {
+        if (onDebugInfo != null) onDebugInfo('No file path selected for backup');
+        throw Exception('No file path selected for backup');
+      }
+    }
+    final file = File(savePath);
     final bytes = excel.encode();
+    if (onDebugInfo != null) onDebugInfo('Excel encode bytes: \\${bytes?.length ?? 'null'}');
     if (bytes == null) {
-      throw Exception('Failed to encode Excel file');
+      final err = 'Failed to encode Excel file. Sheet row counts: ' +
+        excel.tables.keys.map((k) => '$k=\\${excel.tables[k]?.rows.length}').join(', ') +
+        '. This may indicate an API mismatch with the excel package or empty sheets.';
+      if (onDebugInfo != null) onDebugInfo(err);
+      throw Exception(err);
     }
     await file.writeAsBytes(bytes, flush: true);
+    if (onDebugInfo != null) onDebugInfo('Backup written to: $savePath');
   }
 
   dynamic _parseField(dynamic value) {
